@@ -8,12 +8,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common'
 import { ApplicationEntity } from './application.entity'
 import { ApplicationService } from './application.service'
-import { CreateApplicationDto, UpdateApplicationDto } from './dto'
+import { CreateApplicationDto, SearchApplicationDto, UpdateApplicationDto } from './dto'
 
 @Controller('applications')
 export class ApplicationController {
@@ -23,6 +24,13 @@ export class ApplicationController {
   @Get()
   public findAll(): Promise<ApplicationEntity[]> {
     return this.applicationService.findAll()
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe())
+  @Get('/search')
+  public search(@Query() dto: SearchApplicationDto) {
+    return this.applicationService.search(dto)
   }
 
   @HttpCode(HttpStatus.OK)

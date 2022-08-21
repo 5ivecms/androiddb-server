@@ -1,24 +1,61 @@
 import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { plainToClass, plainToInstance } from 'class-transformer'
-import { DeleteResult, Repository, UpdateResult } from 'typeorm'
+import { plainToInstance } from 'class-transformer'
+import { OrderDirection } from 'src/types'
+import { isNumeric } from 'src/utils'
+import { DeleteResult, Repository } from 'typeorm'
 import { CategoryService } from '../category/category.service'
 import { DeveloperService } from '../developer/developer.service'
 import { ParsingStatus } from '../pdalife-parser/pdalife-parser.interfaces'
 import { ScreenshotService } from '../screenshot/screenshot.service'
 import { TagService } from '../tag/tag.service'
 import { ApplicationEntity } from './application.entity'
-import { CreateApplicationDto, UpdateApplicationDto } from './dto'
+import { CreateApplicationDto, SearchApplicationDto, UpdateApplicationDto } from './dto'
 
 @Injectable()
 export class ApplicationService {
   constructor(
     @InjectRepository(ApplicationEntity) private readonly applicationRepository: Repository<ApplicationEntity>,
-    private readonly categoryService: CategoryService,
     private readonly tagService: TagService,
+    private readonly categoryService: CategoryService,
     private readonly developerService: DeveloperService,
     private readonly screenshotService: ScreenshotService
   ) {}
+
+  public async search(dto: SearchApplicationDto) {
+    let { limit, page, order, orderBy, search } = dto
+
+    orderBy = orderBy || 'id'
+    order = (order || 'desc').toUpperCase()
+
+    limit = limit || 10
+    limit > 100 ? 100 : limit
+
+    page = page || 1
+    page < 1 ? 1 : page
+
+    const offset = (page - 1) * limit
+
+    const queryBuilder = this.applicationRepository.createQueryBuilder('application')
+
+    queryBuilder.orderBy(orderBy, order as OrderDirection)
+    queryBuilder.offset(offset)
+    queryBuilder.limit(limit)
+
+    if (search) {
+      Object.keys(search).forEach((key) => {
+        if (isNumeric(search[key])) {
+          queryBuilder.andWhere(`application.${key} = :${key}`, { [key]: search[key] })
+          return
+        }
+        queryBuilder.andWhere(`application.${key} ILIKE :${key}`, { [key]: `%${search[key]}%` })
+      })
+    }
+
+    const [items, total] = await queryBuilder.getManyAndCount()
+
+    return { items, total, page, limit }
+  }
 
   public findAll(): Promise<ApplicationEntity[]> {
     return this.applicationRepository.find({
@@ -27,7 +64,10 @@ export class ApplicationService {
   }
 
   public async findOne(id: number): Promise<ApplicationEntity> {
-    const application = await this.applicationRepository.findOneBy({ id })
+    const application = await this.applicationRepository.findOne({
+      where: { id },
+      relations: ['categories', 'screenshots', 'developer', 'tags', 'applicationVersions', 'applicationVersions.files'],
+    })
 
     if (!application) {
       throw new NotAcceptableException('Application not found')

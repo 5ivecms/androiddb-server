@@ -21,11 +21,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "^8.0.0",
+    "@nestjs/common": "^9.0.8",
     "@nestjs/config": "^2.2.0",
-    "@nestjs/core": "^8.0.0",
-    "@nestjs/mapped-types": "*",
-    "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/core": "^9.0.8",
+    "@nestjs/mapped-types": "^1.1.0",
+    "@nestjs/platform-express": "^9.0.8",
+    "@nestjs/serve-static": "^3.0.0",
     "@nestjs/typeorm": "^9.0.0",
     "app-root-path": "^3.0.0",
     "axios": "^0.27.2",
@@ -43,9 +44,9 @@
     "webdriverio": "^7.20.5"
   },
   "devDependencies": {
-    "@nestjs/cli": "^8.0.0",
-    "@nestjs/schematics": "^8.0.0",
-    "@nestjs/testing": "^8.0.0",
+    "@nestjs/cli": "^9.0.0",
+    "@nestjs/schematics": "^9.0.1",
+    "@nestjs/testing": "^9.0.8",
     "@types/app-root-path": "^1.2.4",
     "@types/axios": "^0.14.0",
     "@types/cheerio": "^0.22.31",

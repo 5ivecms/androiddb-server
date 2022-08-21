@@ -4,7 +4,6 @@ import * as Joi from 'joi'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { databaseConfig, serverConfig, storageConfig } from './config'
-import { ApkModule } from './modules/apk/apk.module'
 import { ApplicationVersionModule } from './modules/application-version/application-version.module'
 import { ApplicationModule } from './modules/application/application.module'
 import { CategoryModule } from './modules/category/category.module'
@@ -40,7 +39,6 @@ const ENV = process.env.NODE_ENV
     CategoryModule,
     ScreenshotModule,
     TagModule,
-    ApkModule,
     DeveloperModule,
     ApplicationVersionModule,
     FileModule,

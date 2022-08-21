@@ -7,11 +7,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common'
 import { CategoryService } from './category.service'
-import { CreateCategoryDto, UpdateCategoryDto } from './dto'
+import { CreateCategoryDto, SearchCategoryDto, UpdateCategoryDto } from './dto'
 
 @Controller('category')
 export class CategoryController {
@@ -20,6 +21,11 @@ export class CategoryController {
   @Get()
   public findAll() {
     return this.categoryService.findAll()
+  }
+
+  @Get('/search')
+  public search(@Query() dto: SearchCategoryDto) {
+    return this.categoryService.search(dto)
   }
 
   @Get(':id')

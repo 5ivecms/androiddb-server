@@ -1,12 +1,49 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DeleteResult, Repository, UpdateResult } from 'typeorm'
+import { DeleteResult, Like, Repository, UpdateResult } from 'typeorm'
 import { Developer } from './developer.entity'
-import { CreateDeveloperDto, UpdateDeveloperDto } from './dto'
+import { CreateDeveloperDto, SearchDeveloperDto, UpdateDeveloperDto } from './dto'
 
 @Injectable()
 export class DeveloperService {
   constructor(@InjectRepository(Developer) private readonly developerRepository: Repository<Developer>) {}
+
+  public async search(dto: SearchDeveloperDto) {
+    let { limit, page, order, orderBy, search } = dto
+
+    limit = limit || 10
+    limit > 100 ? 100 : limit
+
+    page = page || 1
+    page < 1 ? 1 : page
+
+    const skip = (page - 1) * limit
+
+    orderBy = orderBy || 'id'
+    order = order || 'DESC'
+
+    let where = {}
+    if (search && Object.keys(search).length) {
+      where = Object.keys(search).reduce((acc, item) => {
+        if (item === 'id' && String(dto.search[item]) !== '') {
+          if (String(dto.search[item]) !== '') {
+            return { ...acc, [item]: Number(dto.search[item]) }
+          }
+          return { ...acc }
+        }
+        return { ...acc, [item]: Like('%' + dto.search[item] + '%') }
+      }, {})
+    }
+
+    const [result, total] = await this.developerRepository.findAndCount({
+      where,
+      order: { [orderBy]: order.toLocaleUpperCase() },
+      take: limit,
+      skip,
+    })
+
+    return { items: result, total, page: Number(page), limit }
+  }
 
   public findAll(): Promise<Developer[]> {
     return this.developerRepository.find()
