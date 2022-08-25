@@ -38,9 +38,13 @@ export class ApplicationService {
 
     const queryBuilder = this.applicationRepository.createQueryBuilder('application')
 
-    queryBuilder.orderBy(orderBy, order as OrderDirection)
+    queryBuilder.leftJoinAndSelect('application.developer', 'developer')
+
+    queryBuilder.orderBy(`application.${orderBy}`, order as OrderDirection)
     queryBuilder.offset(offset)
     queryBuilder.limit(limit)
+
+    console.log(search)
 
     if (search) {
       Object.keys(search).forEach((key) => {
