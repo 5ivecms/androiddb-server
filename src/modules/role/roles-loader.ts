@@ -18,4 +18,6 @@ export const rolesLoader = async (configService: any) => {
   const roleRepository = dataSource.getRepository(Role)
   const role = roleRepository.create({ name: 'Администратор', type: 'administrator' })
   await roleRepository.save(role)
+
+  await dataSource.destroy()
 }
